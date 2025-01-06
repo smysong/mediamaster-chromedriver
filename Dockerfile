@@ -2,39 +2,15 @@
 FROM ubuntu:24.04
 # 设置工作目录
 WORKDIR /app
-# 更新软件包列表
-RUN apt-get update -y
-# 安装必要的软件包
-RUN apt-get install -y \
-curl \
-unzip \
-python3-pip \
-python3-venv \
-cron \
-wget \
-fonts-liberation \
-libasound2-plugins \
-libatk-bridge2.0-0 \
-libatk1.0-0 \
-libatspi2.0-0 \
-libcairo2 \
-libcups2 \
-libdrm2 \
-libgbm1 \
-libgtk-3-0 \
-libnspr4 \
-libnss3 \
-libpango-1.0-0 \
-libvulkan1 \
-libxcomposite1 \
-libxdamage1 \
-libxext6 \
-libxfixes3 \
-libxkbcommon0 \
-libxrandr2 \
-xdg-utils \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/*
+# 更新软件包列表并安装必要的软件包
+RUN apt-get update && \
+    apt-get install -y curl unzip python3-pip python3-venv cron wget fonts-liberation \
+                       libasound2-plugins libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 \
+                       libcairo2 libcups2 libdrm2 libgbm1 libgtk-3-0 libnspr4 libnss3 \
+                       libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
+                       libxfixes3 libxkbcommon0 libxrandr2 xdg-utils && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # 设置系统语言为简体中文
 RUN apt-get update -y && \
