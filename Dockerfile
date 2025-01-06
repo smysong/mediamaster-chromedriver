@@ -33,32 +33,13 @@ RUN apt-get update -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# 检测 CPU 架构并安装对应的 Chrome
+# 检测 CPU 架构并安装对应的 Chromium 和 Chromedriver
 RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ]; then \
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-        dpkg -i google-chrome-stable_current_amd64.deb && \
-        apt-get install -f -y && \
-        rm google-chrome-stable_current_amd64.deb; \
-    elif [ "$ARCH" = "aarch64" ]; then \
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_arm64.deb && \
-        dpkg -i google-chrome-stable_current_arm64.deb && \
-        apt-get install -f -y && \
-        rm google-chrome-stable_current_arm64.deb; \
-    fi
-
-# 检测 CPU 架构并安装对应的 ChromeDriver
-RUN ARCH=$(uname -m) && \
-    CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    if [ "$ARCH" = "x86_64" ]; then \
-        wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip; \
-    elif [ "$ARCH" = "aarch64" ]; then \
-        wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip; \
-    fi && \
-    if [ -f chromedriver.zip ]; then \
-        unzip chromedriver.zip -d /usr/local/bin/ && \
-        chmod +x /usr/local/bin/chromedriver && \
-        rm chromedriver.zip; \
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ]; then \
+        apt-get update -y && \
+        apt-get install -y chromium-browser chromium-chromedriver && \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/*; \
     fi
 
 # 创建虚拟环境
