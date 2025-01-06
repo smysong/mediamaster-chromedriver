@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}系统设置{% endblock %}
+{% block content %}
+<h3>系统配置设置</h3>
+
+<form method="post" action="/save_set">
+    {% for section, options in config.items() %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">{{ section_titles[section] }}</h5>
+        </div>
+        <div class="card-body">
+            {% for key, value in options.items() %}
+            <div class="form-group row">
+                <label for="{{ section }}_{{ key }}" class="col-sm-3 col-form-label" style="font-size: clamp(12px, 1.2vw, 16px);">{{ descriptions[section][key] }}</label>
+                <div class="col-sm-9" style="font-size: clamp(12px, 1.2vw, 16px);">
+                    {% if ',' in value %}
+                    <input type="text" class="form-control" name="{{ section }}[{{ key }}]" id="{{ section }}_{{ key }}" value="{{ value }}" style="margin-bottom: 5px;">
+                    <small class="form-text text-muted" style="font-size: clamp(12px, 1.2vw, 16px);">多个值可以用逗号分隔。</small>
+                    {% else %}
+                    <input type="text" class="form-control" name="{{ section }}[{{ key }}]" id="{{ section }}_{{ key }}" value="{{ value }}" style="margin-bottom: 5px;">
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-sm btn-primary" style="margin-bottom: 15px;">保存更改</button>
+    <a href="/change_password" class="btn btn-sm btn-warning" style="margin-bottom: 15px;margin-left: 15px;">修改密码</a>
+</form>
+
+<!-- Toast提示框 -->
+<div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1060;">
+    <div class="toast-header">
+        <strong class="me-auto">系统提示</strong>
+        <small>现在</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toastMessage" style="text-align: center;">
+        默认消息
+    </div>
+</div>
+<script src="/static/js/jquery.min.js"></script>
+<!-- 初始化 Toast 消息 -->
+<script>
+    $(document).ready(function () {
+        // 获取 Flask 传递的闪现消息
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    // 设置 Toast 消息内容
+                    $('#toastMessage').text('{{ message }}');
+
+                    // 初始化并显示 Toast
+                    var toast = new bootstrap.Toast(document.getElementById('toast'), {
+                        delay: 2000  // 设置自动关闭的时间，单位为毫秒
+                    });
+                    toast.show();
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    });
+</script>
+{% endblock %}
