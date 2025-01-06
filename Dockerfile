@@ -14,8 +14,8 @@ RUN ARCH=$(uname -m) && \
                            libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
                            libxfixes3 libxkbcommon0 libxrandr2 xdg-utils; \
     elif [ "$ARCH" = "armv7l" ]; then \
-        apt-get install -y libasound2-plugins libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 \
-                           libcairo2 libcups2 libdrm2 libgbm1 libgtk-3-0 libnspr4 libnss3 \
+        apt-get install -y libasound2-plugins libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 \
+                           libcairo2 libcups2t64 libdrm2 libgbm1 libgtk-3-0t64 libnspr4 libnss3 \
                            libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
                            libxfixes3 libxkbcommon0 libxrandr2 xdg-utils; \
     fi && \
