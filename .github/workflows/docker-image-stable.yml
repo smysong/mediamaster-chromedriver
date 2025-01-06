@@ -21,4 +21,4 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push the Docker image
-      run: docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64/v8 -t smysong/mediamaster-chromedriver:stable --push .
+      run: docker buildx build --platform linux/amd64,linux/arm64/v8 -t smysong/mediamaster-chromedriver:stable --push .

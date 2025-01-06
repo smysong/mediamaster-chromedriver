@@ -13,11 +13,6 @@ RUN ARCH=$(uname -m) && \
                            libcairo2 libcups2 libdrm2 libgbm1 libgtk-3-0 libnspr4 libnss3 \
                            libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
                            libxfixes3 libxkbcommon0 libxrandr2 xdg-utils; \
-    elif [ "$ARCH" = "armv7l" ]; then \
-        apt-get install -y libasound2-plugins libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 \
-                           libcairo2 libcups2t64 libdrm2 libgbm1 libgtk-3-0t64 libnspr4 libnss3 \
-                           libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
-                           libxfixes3 libxkbcommon0 libxrandr2 xdg-utils; \
     fi && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -50,11 +45,6 @@ RUN ARCH=$(uname -m) && \
         dpkg -i google-chrome-stable_current_arm64.deb && \
         apt-get install -f -y && \
         rm google-chrome-stable_current_arm64.deb; \
-    elif [ "$ARCH" = "armv7l" ]; then \
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_armhf.deb && \
-        dpkg -i google-chrome-stable_current_armhf.deb && \
-        apt-get install -f -y && \
-        rm google-chrome-stable_current_armhf.deb; \
     fi
 
 # 检测 CPU 架构并安装对应的 ChromeDriver
@@ -64,8 +54,6 @@ RUN ARCH=$(uname -m) && \
         wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip; \
     elif [ "$ARCH" = "aarch64" ]; then \
         wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip; \
-    elif [ "$ARCH" = "armv7l" ]; then \
-        wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux32.zip; \
     fi && \
     if [ -f chromedriver.zip ]; then \
         unzip chromedriver.zip -d /usr/local/bin/ && \
