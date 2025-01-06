@@ -37,7 +37,8 @@ RUN apt-get update -y && \
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ]; then \
         apt-get update -y && \
-        apt-get install -y chromium-browser chromium-chromedriver && \
+        apt-get install -y snapd && \
+        snap install chromium --classic && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*; \
     fi
