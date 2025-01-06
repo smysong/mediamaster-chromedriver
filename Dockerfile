@@ -33,15 +33,21 @@ RUN apt-get update -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# 检测 CPU 架构并安装对应的 Chromium 和 Chromedriver
-RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ]; then \
-        apt-get update -y && \
-        apt-get install -y snapd && \
-        snap install chromium --classic && \
-        apt-get clean && \
-        rm -rf /var/lib/apt/lists/*; \
-    fi
+# 安装 Google Chrome
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+&& sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
+&& apt-get update \
+&& apt-get install -y google-chrome-stable \
+&& rm -rf /var/lib/apt/lists/*
+
+# 下载并配置 ChromeDriver
+RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+') \
+&& CHROME_DRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%.*}") \
+&& wget -N "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" \
+&& unzip chromedriver_linux64.zip \
+&& mv chromedriver /usr/local/bin/ \
+&& chmod +x /usr/local/bin/chromedriver \
+&& rm chromedriver_linux64.zip
 
 # 创建虚拟环境
 RUN python3 -m venv /app/venv
