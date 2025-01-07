@@ -118,15 +118,16 @@ def scan_episodes(path):
 
                                 # 提取季编号
                                 season_number_element = season_root.find('seasonnumber')
-                                if season_number_element is not None:
+                                if season_number_element is not None and season_number_element.text is not None:
                                     season_number = int(season_number_element.text.strip())
 
                                 # 提取年份
                                 year_element = season_root.find('year')
-                                if year_element is not None:
+                                if year_element is not None and year_element.text is not None:
                                     year = int(year_element.text.strip())
                                 else:
                                     year = None
+                                    logging.warning(f"season.nfo 文件中未找到年份元素或年份为空: {season_nfo_path}")
 
                                 # 初始化季信息
                                 if season_number not in episodes[show_name]['seasons']:
@@ -256,23 +257,30 @@ def insert_or_update_episodes(db_path, episodes):
 
         for season, season_info in show_info['seasons'].items():
             year = season_info['year']
-            episodes_str = ','.join(map(str, sorted(season_info['episodes'])))
+            current_episodes = set(season_info['episodes'])
 
             cursor.execute('SELECT id, episodes FROM LIB_TV_SEASONS WHERE tv_id = ? AND season = ?', (tv_id, season))
             existing_season = cursor.fetchone()
 
             if existing_season:
                 existing_episodes_str = existing_season[1]
-                existing_episodes = set(map(int, existing_episodes_str.split(',')))
-                new_episodes = set(season_info['episodes'])
+                logging.debug(f"现有集数字符串: {existing_episodes_str}")
+                if existing_episodes_str:  # 检查是否为空字符串
+                    existing_episodes = set(map(int, existing_episodes_str.split(',')))
+                else:
+                    existing_episodes = set()
+                    logging.debug(f"现有集数为空，初始化为空集。")
 
-                if new_episodes != existing_episodes:
-                    updated_episodes_str = ','.join(map(str, sorted(new_episodes.union(existing_episodes))))
+                # 只更新新增的集数
+                new_episodes = current_episodes - existing_episodes
+                if new_episodes:
+                    updated_episodes_str = ','.join(map(str, sorted(existing_episodes.union(new_episodes))))
                     cursor.execute('UPDATE LIB_TV_SEASONS SET episodes = ?, year = ? WHERE id = ?', (updated_episodes_str, year, existing_season[0]))
                     logging.info(f"已更新电视剧 '{show_name}' 第 {season} 季的集数和年份：{updated_episodes_str}, {year}")
                 else:
                     logging.debug(f"电视剧 '{show_name}' 第 {season} 季已是最新状态。")
             else:
+                episodes_str = ','.join(map(str, sorted(current_episodes)))
                 cursor.execute('INSERT INTO LIB_TV_SEASONS (tv_id, season, year, episodes) VALUES (?, ?, ?, ?)', (tv_id, season, year, episodes_str))
                 logging.info(f"已将电视剧 '{show_name}' 第 {season} 季的集数 {episodes_str} 和年份 {year} 插入数据库。")
 
