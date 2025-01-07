@@ -72,6 +72,7 @@ COPY rss.py .
 COPY scan_media.py .
 COPY sync.py .
 COPY tmdb_id.py .
+COPY auto_delete_tasks.py .
 
 # 复制 html 模板
 COPY templates.zip .
