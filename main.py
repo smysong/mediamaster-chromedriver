@@ -190,6 +190,10 @@ def main():
                                 config.get('mediadir', 'movies_path', fallback='') != '/Media/Your_movie_path' and
                                 config.get('mediadir', 'episodes_path', fallback='') != '/Media/Your_episodes_path')
 
+    # 检查下载器设置是否为默认值或空值
+    should_run_auto_delete = (config.get('download_mgmt', 'download_mgmt', fallback='False') == 'True' and
+                              config.get('download_mgmt', 'download_mgmt_url', fallback='') != 'http://your_transmission_url:port')
+
     # 启动 app.py
     app_pid = start_app()
     # 根据条件启动 sync.py
@@ -246,6 +250,13 @@ def main():
             logging.info("-" * 80)
             logging.info("更新每集演职人员中文信息，已执行完毕。")
             logging.info("-" * 80)
+
+        if should_run_auto_delete:
+            run_script('auto_delete_tasks.py')
+            logging.info("-" * 80)
+            logging.info("自动删除已完成做种任务已执行完毕。")
+            logging.info("-" * 80)
+
 
         logging.info(f"所有任务已完成，等待 {run_interval_hours} 小时后再次运行...")
         time.sleep(run_interval_seconds)

@@ -2,6 +2,18 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.2] - 2025-01-07
+
+### 修复
+- 修复扫描媒体库时某些剧集的多季总集数计数不正确的问题。
+- 修复部分已知BUG。
+
+### 新增
+- 新增对已完成做种任务的自动删除功能。
+
+### 注意事项
+- 配置文件中url部分需要使用1.6.3版本配置方式。
+
 ## [1.7.1] - 2025-01-06
 
 ### 修改
@@ -115,3 +127,4 @@
 
 [1.7.0]: https://github.com/smysong/mediamaster/releases/tag/1.7.0
 [1.7.1]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.1
+[1.7.2]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.1
