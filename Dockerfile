@@ -5,15 +5,12 @@ FROM ubuntu:24.04
 WORKDIR /app
 
 # 检测 CPU 架构并更新软件包列表并安装必要的软件包
-RUN ARCH=$(uname -m) && \
-    apt-get update && \
-    apt-get install -y curl unzip python3-pip python3-venv cron wget fonts-liberation && \
-    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ]; then \
-        apt-get install -y libasound2-plugins libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 \
-                           libcairo2 libcups2 libdrm2 libgbm1 libgtk-3-0 libnspr4 libnss3 \
-                           libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
-                           libxfixes3 libxkbcommon0 libxrandr2 xdg-utils; \
-    fi && \
+RUN apt-get update && \
+    apt-get install -y curl unzip python3-pip python3-venv cron wget fonts-liberation \
+                       libasound2-plugins libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 \
+                       libcairo2 libcups2 libdrm2 libgbm1 libgtk-3-0 libnspr4 libnss3 \
+                       libpango-1.0-0 libvulkan1 libxcomposite1 libxdamage1 libxext6 \
+                       libxfixes3 libxkbcommon0 libxrandr2 xdg-utils && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -34,20 +31,18 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 
 # 安装 Google Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-&& sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
-&& apt-get update \
-&& apt-get install -y google-chrome-stable \
+RUN wget -q https://repo.debiancn.org/debiancn/pool/main/g/google-chrome-stable/google-chrome-stable_131.0.6778.85-1_amd64.deb \
+&& dpkg -i google-chrome-stable_131.0.6778.85-1_amd64.deb \
+&& apt-get install -f -y \
+&& rm -f google-chrome-stable_131.0.6778.85-1_amd64.deb \
 && rm -rf /var/lib/apt/lists/*
 
 # 下载并配置 ChromeDriver
-RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+') \
-&& CHROME_DRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%.*}") \
-&& wget -N "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" \
-&& unzip chromedriver_linux64.zip \
-&& mv chromedriver /usr/local/bin/ \
+RUN wget -N https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.204/linux64/chromedriver-linux64.zip \
+&& unzip chromedriver-linux64.zip \
+&& mv chromedriver-linux64/chromedriver /usr/local/bin/ \
 && chmod +x /usr/local/bin/chromedriver \
-&& rm chromedriver_linux64.zip
+&& rm -rf chromedriver-linux64.zip chromedriver-linux64
 
 # 创建虚拟环境
 RUN python3 -m venv /app/venv
