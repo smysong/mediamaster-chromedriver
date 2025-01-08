@@ -34,13 +34,23 @@ class MovieDownloader:
         options.add_argument('--no-sandbox')  # 在非root用户下需要禁用沙盒
         options.add_argument('--disable-dev-shm-usage')  # 解决/dev/shm空间不足的问题
         options.add_argument('--window-size=1920x1080')  # 设置窗口大小
+        options.add_argument('--disable-gpu')  # 禁用GPU加速
+        options.add_argument('--disable-extensions')  # 禁用扩展插件
+        # 设置用户配置文件缓存目录
+        user_data_dir = '/app/ChromeCache/user-data-dir'
+        options.add_argument(f'--user-data-dir={user_data_dir}')
+        # 设置磁盘缓存目录
+        disk_cache_dir = "/app/ChromeCache/disk-cache-dir"
+        options.add_argument(f"--disk-cache-dir={disk_cache_dir}")
         
         # 设置默认下载目录
         prefs = {
             "download.default_directory": "/Torrent",
             "download.prompt_for_download": False,
             "download.directory_upgrade": True,
-            "safebrowsing.enabled": True
+            "safebrowsing.enabled": True,
+            "intl.accept_languages": "zh-CN",
+            "profile.managed_default_content_settings.images": 2
         }
         options.add_experimental_option("prefs", prefs)
 
@@ -124,14 +134,24 @@ class MovieDownloader:
     def login(self, url, username, password):
         self.driver.get(url)
         try:
+            # 检查是否已经自动登录
+            if self.is_logged_in():
+                logger.info("自动登录成功，无需再次登录")
+                return
+            
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.NAME, "username"))
             )
-            logger.debug("登录页面加载完成")
+            logger.info("登录页面加载完成")
             username_input = self.driver.find_element(By.NAME, 'username')
             password_input = self.driver.find_element(By.NAME, 'password')
             username_input.send_keys(username)
             password_input.send_keys(password)
+            
+            # 勾选自动登录选项
+            auto_login_checkbox = self.driver.find_element(By.NAME, 'cookietime')
+            auto_login_checkbox.click()
+            
             submit_button = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.NAME, 'loginsubmit'))
             )
@@ -144,6 +164,16 @@ class MovieDownloader:
             logger.error("登录失败或页面未正确加载，未找到预期元素！")
             self.driver.quit()
             exit(1)
+
+    def is_logged_in(self):
+        try:
+            # 检查页面中是否存在特定的提示文本
+            WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.XPATH, "//*[contains(text(), '欢迎您回来')]"))
+            )
+            return True
+        except TimeoutException:
+            return False
 
     def load_download_records(self):
         """加载已下载记录"""

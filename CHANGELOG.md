@@ -2,6 +2,17 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.3] - 2025-01-08
+
+### 优化
+- 优化WebDriver初始化选项，提升一定的性能和响应速度。
+
+### 新增
+- 新增WebDriver支持保持站点登录状态，避免cookie有效期内重复登录。
+
+### 注意事项
+- 配置文件中url部分需要使用1.6.3版本配置方式。
+
 ## [1.7.2] - 2025-01-07
 
 ### 修复
@@ -128,3 +139,4 @@
 [1.7.0]: https://github.com/smysong/mediamaster/releases/tag/1.7.0
 [1.7.1]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.1
 [1.7.2]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.2
+[1.7.3]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.3
