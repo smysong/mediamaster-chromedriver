@@ -2,6 +2,17 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.4] - 2025-01-20
+
+### 修复
+- 修复手动搜索时WebDriver未自动关闭导致下一次搜索时WebDriver初始化识别导致程序崩溃的问题。
+
+### 优化
+- 优化已知的一些问题，提升程序的稳定性。
+
+### 注意事项
+- 配置文件中url部分需要使用1.6.3版本配置方式。
+
 ## [1.7.3] - 2025-01-08
 
 ### 优化
@@ -140,3 +151,4 @@
 [1.7.1]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.1
 [1.7.2]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.2
 [1.7.3]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.3
+[1.7.4]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.4
