@@ -31,6 +31,9 @@ class MediaDownloader:
         self.load_config()
 
     def setup_webdriver(self):
+        if hasattr(self, 'driver') and self.driver is not None:
+            logging.info("WebDriver已经初始化，无需重复初始化")
+            return
         options = Options()
         options.add_argument('--headless')  # 无头模式运行
         options.add_argument('--no-sandbox')  # 在非root用户下需要禁用沙盒
@@ -259,7 +262,7 @@ class MediaDownloader:
                 except NoSuchElementException:
                     logger.warning("未找到搜索结果元素")
                     continue
-
+            self.close_driver()
             return results
         except TimeoutException:
             logger.error("搜索框加载超时，未找到预期元素！")
@@ -335,7 +338,7 @@ class MediaDownloader:
                 except NoSuchElementException:
                     logger.warning("未找到搜索结果元素")
                     continue
-
+            self.close_driver()
             return results
         except TimeoutException:
             logger.error("搜索框加载超时，未找到预期元素！")

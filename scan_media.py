@@ -322,7 +322,17 @@ def delete_obsolete_episodes(db_path, current_episodes):
             all_seasons = cursor.fetchall()
 
             for season, episodes_str in all_seasons:
-                existing_episodes = set(map(int, episodes_str.split(',')))
+                # 检查 episodes_str 是否为空字符串
+                if not episodes_str or not episodes_str.strip():
+                    existing_episodes = set()
+                    logging.warning(f"电视剧 '{title}' 第 {season} 季的集数为空，初始化为空集。")
+                else:
+                    try:
+                        existing_episodes = set(map(int, episodes_str.split(',')))
+                    except ValueError as e:
+                        logging.error(f"无法解析电视剧 '{title}' 第 {season} 季的集数: {episodes_str}. 错误: {e}")
+                        existing_episodes = set()
+
                 current_episodes_set = set(current_episodes[title].get(season, {}).get('episodes', []))
 
                 if not current_episodes_set.issubset(existing_episodes):

@@ -110,7 +110,15 @@ def update_subscriptions(cursor):
         ''', (title, season)).fetchone()
 
         if existing_episodes_str:
-            existing_episodes = set(map(int, existing_episodes_str[0].split(',')))
+            # 清理和验证 existing_episodes_str
+            existing_episodes = set()
+            if existing_episodes_str[0]:
+                try:
+                    existing_episodes = set(int(ep) for ep in existing_episodes_str[0].split(',') if ep.strip().isdigit())
+                except ValueError as e:
+                    logger.error(f"无效的集数数据：{existing_episodes_str[0]}，跳过处理。")
+                    continue
+
             if missing_episodes:
                 missing_episodes_set = set(map(int, missing_episodes.split(',')))
             else:

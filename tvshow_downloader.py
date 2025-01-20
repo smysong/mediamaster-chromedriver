@@ -30,6 +30,9 @@ class TVDownloader:
         self.db_path = None  # 初始值为None，将在load_config中设置
 
     def setup_webdriver(self):
+        if hasattr(self, 'driver') and self.driver is not None:
+            logging.info("WebDriver已经初始化，无需重复初始化")
+            return
         options = Options()
         options.add_argument('--headless')  # 无头模式运行
         options.add_argument('--no-sandbox')  # 在非root用户下需要禁用沙盒
