@@ -43,7 +43,7 @@
 </div>
 
 <!-- Modal -->
-<div id="mediaDetailsModal" class="modal fade" tabindex="-1" aria-labelledby="InfoCardLabel" aria-hidden="true">
+<div id="mediaDetailsModal" class="modal fade" tabindex="-1" aria-labelledby="InfoCardLabel">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="InfoCard-header d-flex justify-content-between align-items-center">
@@ -71,6 +71,7 @@
     const apiKey = '848cf06ff307f9e2a20b3eb51be775b0';
     const baseUrl = 'https://static-mdb.v.geilijiasu.com/t/p/w500';
     const defaultImageUrl = '/static/img/no-image.png';
+    const mediaType = "{{ media_type }}"; // 将 media_type 传递给 JavaScript
 
     function fetchMoviePoster(imgElement) {
         const tmdbId = imgElement.dataset.tmdbId;
@@ -124,7 +125,7 @@
         const itemCount = items.length;
         const perPage = {{ per_page }};
         const currentPage = {{ page }};
-        const totalPages = Math.ceil((media_type == 'movies' ? {{ total_movies }} : {{ total_tvs }}) / perPage);
+        const totalPages = Math.ceil((mediaType == 'movies' ? {{ total_movies }} : {{ total_tvs }}) / perPage);
 
         if (currentPage === 1) {
             $('#prevPage').hide();

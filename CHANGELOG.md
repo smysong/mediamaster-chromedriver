@@ -2,6 +2,11 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.6] - 2025-01-23
+
+### 修复
+- 修复了媒体库前端页面代码中JavaScript的一个小错误。
+
 ## [1.7.5] - 2025-01-22
 
 ### 新增
@@ -164,3 +169,4 @@
 [1.7.3]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.3
 [1.7.4]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.4
 [1.7.5]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.5
+[1.7.6]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.6
