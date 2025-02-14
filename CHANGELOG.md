@@ -2,6 +2,11 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.7] - 2025-02-14
+
+### 优化
+- 优化文件转移重命名时视频质量英文字母大小写不统一的问题。
+
 ## [1.7.6] - 2025-01-23
 
 ### 修复
@@ -170,3 +175,4 @@
 [1.7.4]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.4
 [1.7.5]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.5
 [1.7.6]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.6
+[1.7.7]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.7

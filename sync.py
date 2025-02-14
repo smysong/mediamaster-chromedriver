@@ -204,7 +204,7 @@ def extract_info(filename, folder_name=None):
 
         # 提取视频质量
         quality = re.search(quality_pattern, filename)
-        quality = quality.group().upper() if quality else None
+        quality = quality.group().lower() if quality else None  # 将提取到的视频质量转换为小写
 
         # 提取文件后缀名
         suffix = re.search(suffix_pattern, filename)
