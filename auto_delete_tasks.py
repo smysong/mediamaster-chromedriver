@@ -1,6 +1,8 @@
 import configparser
 import requests
 import logging
+import os
+import shutil
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s', encoding='utf-8')
@@ -24,6 +26,9 @@ session_id = ''
 
 # 后端URL
 backend_url = f'{internal_download_mgmt_url}/transmission/rpc'
+
+# Torrent目录路径
+TORRENT_DIR = '/Torrent'
 
 def get_torrents():
     global session_id
@@ -55,6 +60,7 @@ def get_torrents():
         
         if not torrents:
             logger.info('任务列表为空')
+            check_and_delete_torrent_files()
         else:
             delete_stopped_torrents(torrents)
     except requests.exceptions.RequestException as e:
@@ -86,6 +92,22 @@ def delete_stopped_torrents(torrents):
                 logger.info(f'任务 {torrent["name"]} 已删除')
             except requests.exceptions.RequestException as e:
                 logger.error(f'删除任务失败: {e}')
+
+def check_and_delete_torrent_files():
+    if os.path.exists(TORRENT_DIR) and os.path.isdir(TORRENT_DIR):
+        try:
+            # 删除目录中的所有文件
+            for filename in os.listdir(TORRENT_DIR):
+                file_path = os.path.join(TORRENT_DIR, filename)
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            logger.info(f'已删除 {TORRENT_DIR} 目录中的所有文件')
+        except Exception as e:
+            logger.error(f'删除 {TORRENT_DIR} 目录中的文件失败: {e}')
+    else:
+        logger.info(f'{TORRENT_DIR} 目录不存在或不是一个目录')
 
 # 执行一次任务获取和删除操作
 get_torrents()

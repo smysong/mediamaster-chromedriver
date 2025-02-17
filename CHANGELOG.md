@@ -2,6 +2,11 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.8] - 2025-02-17
+
+### 新增
+- 新增自动删种时同步删除磁盘中的种子文件。
+
 ## [1.7.7] - 2025-02-14
 
 ### 优化
@@ -176,3 +181,4 @@
 [1.7.5]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.5
 [1.7.6]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.6
 [1.7.7]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.7
+[1.7.8]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.8
