@@ -4,6 +4,7 @@ import configparser
 import logging
 import requests
 import time
+import re
 import random
 
 # 配置文件路径
@@ -63,6 +64,11 @@ class DoubanAPI:
             "Connection": "keep-alive",
         }
 
+    @staticmethod
+    def remove_season_info(title: str) -> str:
+        # 移除标题中的 "第X季" 信息
+        return re.sub(r'\s*第\d+季', '', title).strip()
+
     def get_douban_id(self, title: str, year: str = None, media_type: str = 'tv') -> list:
         url = f"https://movie.douban.com/j/subject_suggest?q={title}"
         try:
@@ -76,25 +82,27 @@ class DoubanAPI:
                     logger.info("请求返回只有一个结果，直接使用")
                     return [item.get('id')] if item else []
 
-                # 初步筛选：根据 media_type 和 episode 字段
+                # 初步筛选：根据 media_type 和 episode 字段，并且考虑年份
                 matches = []
                 for item in data:
                     if media_type == 'movie' and not item.get('episode'):
-                        matches.append(item)
+                        if year is None or item.get('year') == year:
+                            matches.append(item)
                     elif media_type == 'tv' and item.get('episode'):
-                        matches.append(item)
+                        if year is None or item.get('year') == year:
+                            matches.append(item)
 
                 if len(matches) == 1:
                     # 如果只有一个匹配项，直接使用这个结果
                     logger.info("找到一个匹配项")
                     return [matches[0].get('id')]
                 elif len(matches) > 1:
-                    # 如果有多个匹配项，选择标题相同或匹配度最高的结果，并且需要匹配年份
+                    # 如果有多个匹配项，选择标题相同或匹配度最高的结果
                     best_match = None
                     highest_match_score = 0
                     for match in matches:
-                        match_score = self.calculate_match_score(title, match.get('title', ''))
-                        if match.get('year') == year and match_score > highest_match_score:
+                        match_score = self.calculate_match_score(self.remove_season_info(title), self.remove_season_info(match.get('title', '')))
+                        if match_score > highest_match_score:
                             highest_match_score = match_score
                             best_match = match
                     if best_match:
@@ -109,7 +117,6 @@ class DoubanAPI:
         except Exception as e:
             logger.error(f"获取豆瓣 ID 失败，标题: {title}，错误: {e}")
         return []
-
     def calculate_match_score(self, title1: str, title2: str) -> int:
         # 简单的匹配度计算，可以根据需要进行更复杂的实现
         return sum(title1.lower() in part for part in title2.lower().split())
@@ -255,11 +262,11 @@ def update_nfo_file(file_path, directors, actors):
                     # 更新<role>
                     role_element = actor_element.find('role')
                     if role_element is not None:
-                        role_element.text = matched_actor['character']
+                        role_element.text = re.sub(r'饰\s*', '', matched_actor['character']).strip()
                     else:
                         role_element = ET.SubElement(actor_element, 'role')
-                        role_element.text = matched_actor['character']
-        
+                        role_element.text = re.sub(r'饰\s*', '', matched_actor['character']).strip()
+
         # 写回修改后的内容
         tree.write(file_path, encoding='utf-8', xml_declaration=True)
         logger.info(f"更新文件: {file_path}")
@@ -327,9 +334,9 @@ def process_nfo_files(directory, douban_api):
                 
                 if title:
                     if media_type == 'movie':
-                        douban_ids = douban_api.get_douban_id(title, year, media_type)
+                        douban_ids = douban_api.get_douban_id(title, year, media_type='movie')
                     else:
-                        douban_ids = douban_api.get_douban_id(title, media_type=media_type)
+                        douban_ids = douban_api.get_douban_id(title, year, media_type='tv')
                     
                     if not douban_ids and imdb_id:
                         # 随机休眠一段时间，避免频繁请求

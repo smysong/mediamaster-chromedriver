@@ -2,6 +2,12 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.7.9] - 2025-02-28
+
+### 优化
+- 优化NFO文件演职人员汉化时的豆瓣ID匹配逻辑，提高匹配成功率。
+- 优化电影和电视剧搜索下载程序，优先检查数据库中是否有需要下载的订阅，避免订阅为空时程序仍要启动并登录资源站点造成资源浪费。
+
 ## [1.7.8] - 2025-02-17
 
 ### 新增
@@ -182,3 +188,4 @@
 [1.7.6]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.6
 [1.7.7]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.7
 [1.7.8]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.8
+[1.7.9]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.9

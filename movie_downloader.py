@@ -322,17 +322,22 @@ class MovieDownloader:
         
         # 检查配置文件中的必要信息是否存在
         if not self.config.get("resources", {}).get("login_username") or \
-           not self.config.get("resources", {}).get("login_password") or \
-           not self.config.get("notification", {}).get("notification_api_key"):
+        not self.config.get("resources", {}).get("login_password") or \
+        not self.config.get("notification", {}).get("notification_api_key"):
             logger.error("请编辑配置文件 %s 并填写正确的用户名、密码及API key等参数。", self.config_path)
             exit(1)  # 提示后立即退出程序
+
+        # 提取电影信息
+        all_movie_info = self.extract_movie_info()
+
+        # 检查数据库中是否有有效订阅
+        if not all_movie_info:
+            logger.info("数据库中没有有效订阅，无需执行后续操作")
+            exit(0)  # 退出程序
 
         # 初始化WebDriver
         self.setup_webdriver()
         
-        # 提取电影信息
-        all_movie_info = self.extract_movie_info()
-
         # 登录操作前先检查滑动验证码
         login_url = self.config.get("urls", {}).get("movie_login_url", "")
         self.site_captcha(login_url)  # 检查并处理滑动验证码
