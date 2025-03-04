@@ -2,6 +2,11 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.8.0] - 2025-03-04
+
+### 优化
+- 优化NFO文件演职人员汉化功能对于多季电视节目的处理逻辑。
+
 ## [1.7.9] - 2025-02-28
 
 ### 优化
@@ -189,3 +194,4 @@
 [1.7.7]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.7
 [1.7.8]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.8
 [1.7.9]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.9
+[1.8.0]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.8.0

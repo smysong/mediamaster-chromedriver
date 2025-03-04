@@ -77,20 +77,22 @@ class DoubanAPI:
             data = response.json()
 
             if data and isinstance(data, list):
-                if len(data) == 1:  # 如果请求返回只有一个结果，直接使用这个结果
-                    item = data[0]
-                    logger.info("请求返回只有一个结果，直接使用")
-                    return [item.get('id')] if item else []
-
+                logger.debug(f"原始数据: {data}")  # 输出原始数据
+                logger.debug(f"标题: {title} 年份：{year} 类型：{media_type}")
                 # 初步筛选：根据 media_type 和 episode 字段，并且考虑年份
                 matches = []
                 for item in data:
+                    item_title = self.remove_season_info(item.get('title', ''))
+                    item_year = item.get('year')
                     if media_type == 'movie' and not item.get('episode'):
-                        if year is None or item.get('year') == year:
+                        if year is None or item_year == year:
                             matches.append(item)
-                    elif media_type == 'tv' and item.get('episode'):
-                        if year is None or item.get('year') == year:
-                            matches.append(item)
+                    elif media_type == 'tv':
+                        if item.get('episode') or item.get('type') == 'movie':  # 考虑 type 为 movie 且包含 episode 的项
+                            if year is None or item_year == year:
+                                matches.append(item)
+
+                logger.debug(f"初步筛选后的匹配项: {matches}")  # 输出初步筛选后的匹配项
 
                 if len(matches) == 1:
                     # 如果只有一个匹配项，直接使用这个结果
@@ -110,10 +112,19 @@ class DoubanAPI:
                         return [best_match.get('id')]
                     else:
                         logger.warning(f"未找到标题为 {title} 且年份为 {year} 的最佳匹配项")
+                        sleep_time = random.uniform(15, 30)  # 随机休眠15到30秒
+                        logger.info(f"随机休眠 {sleep_time:.2f} 秒")
+                        time.sleep(sleep_time)
                 else:
                     logger.warning(f"未找到标题为 {title} 的匹配项")
+                    sleep_time = random.uniform(15, 30)  # 随机休眠15到30秒
+                    logger.info(f"随机休眠 {sleep_time:.2f} 秒")
+                    time.sleep(sleep_time)
             else:
                 logger.warning(f"未找到标题为 {title} 的结果")
+                sleep_time = random.uniform(15, 30)  # 随机休眠15到30秒
+                logger.info(f"随机休眠 {sleep_time:.2f} 秒")
+                time.sleep(sleep_time)
         except Exception as e:
             logger.error(f"获取豆瓣 ID 失败，标题: {title}，错误: {e}")
         return []
@@ -191,14 +202,17 @@ def read_nfo_file(file_path):
         tree = ET.parse(file_path)
         root = tree.getroot()
         
-        # 判断是电影还是电视剧
+        # 判断是电影、电视剧还是季
         media_type = None
         if root.tag == 'movie':
-            logger.info(f"这是电影 nfo 文件: {file_path}")
+            logger.debug(f"这是电影 nfo 文件: {file_path}")
             media_type = 'movie'
         elif root.tag == 'tvshow':
-            logger.info(f"这是电视剧 nfo 文件: {file_path}")
+            logger.debug(f"这是电视剧 nfo 文件: {file_path}")
             media_type = 'tv'
+        elif root.tag == 'season':
+            logger.debug(f"这是季 nfo 文件: {file_path}")
+            media_type = 'season'
         else:
             logger.warning(f"未知文件类型: {file_path}")
             return None, None, None, None
@@ -220,7 +234,7 @@ def read_nfo_file(file_path):
             break  # 只需要第一个匹配到的 IMDb ID
         
         if title:
-            logger.info(f"标题: {title}, 年份: {year}, IMDb ID: {imdb_id}")
+            logger.debug(f"标题: {title}, 年份: {year}, IMDb ID: {imdb_id}")
             return media_type, title, year, imdb_id
         else:
             logger.warning(f"未找到文件 {file_path} 中的标题")
@@ -312,6 +326,19 @@ def process_nfo_files(directory, douban_api):
         if should_exclude_directory(root):
             continue
         
+        # 读取父目录的 tvshow.nfo 文件信息
+        tvshow_nfo_path = os.path.join(root, 'tvshow.nfo')
+        tvshow_title = None
+        tvshow_year = None
+        if os.path.exists(tvshow_nfo_path):
+            tvshow_media_type, tvshow_title, tvshow_year, tvshow_imdb_id = read_nfo_file(tvshow_nfo_path)
+            if tvshow_title is None or tvshow_year is None:
+                logger.warning(f"未找到文件 {tvshow_nfo_path} 中的标题或年份")
+                tvshow_title = None
+                tvshow_year = None
+        else:
+            logger.debug(f"未找到文件: {tvshow_nfo_path}")
+        
         for filename in files:
             if filename.endswith('.nfo'):
                 file_path = os.path.join(root, filename)
@@ -334,34 +361,60 @@ def process_nfo_files(directory, douban_api):
                 
                 if title:
                     if media_type == 'movie':
+                        # 获取豆瓣 ID
                         douban_ids = douban_api.get_douban_id(title, year, media_type='movie')
-                    else:
-                        douban_ids = douban_api.get_douban_id(title, year, media_type='tv')
-                    
-                    if not douban_ids and imdb_id:
-                        # 随机休眠一段时间，避免频繁请求
-                        sleep_time = random.uniform(15, 30)  # 随机休眠15到30秒
-                        logger.info(f"随机休眠 {sleep_time:.2f} 秒")
-                        time.sleep(sleep_time)
-                        logger.info(f"尝试通过 IMDb ID 获取豆瓣 ID，IMDb ID: {imdb_id}")
-                        douban_id = douban_api.imdb_get_douban_id(imdb_id)
-                        if douban_id:
-                            douban_ids = [douban_id]
-                    
-                    if douban_ids:
-                        logger.info(f"提取到的豆瓣 IDs 是: {douban_ids}")
+                        if douban_ids:
+                            logger.info(f"提取到的豆瓣 IDs 是: {douban_ids}")
+                            all_directors = []
+                            all_actors = []
+                            for douban_id in douban_ids:
+                                celebs_data = douban_api.get_celebrities(douban_id, media_type)
+                                all_directors.extend(celebs_data.get('directors', []))
+                                all_actors.extend(celebs_data.get('actors', []))
+                            if all_directors or all_actors:
+                                update_nfo_file(file_path, all_directors, all_actors)
+                                save_processed_file(file_path)
+                        else:
+                            logger.warning(f"未能提取豆瓣 ID 对于文件: {file_path}")
+                    elif media_type == 'tv':
+                        # 处理 tvshow.nfo 文件
                         all_directors = []
                         all_actors = []
-                        for douban_id in douban_ids:
-                            celebs_data = douban_api.get_celebrities(douban_id, media_type)
-                            all_directors.extend(celebs_data.get('directors', []))
-                            all_actors.extend(celebs_data.get('actors', []))
+                        season_dirs = [d for d in dirs if d.startswith('Season')]
+                        for season_dir in season_dirs:
+                            season_path = os.path.join(root, season_dir)
+                            season_nfo_path = os.path.join(season_path, 'season.nfo')
+                            if os.path.exists(season_nfo_path):
+                                season_media_type, season_title, season_year, season_imdb_id = read_nfo_file(season_nfo_path)
+                                if season_year:
+                                    # 确保年份是从正确的元素中提取的
+                                    if not season_year.isdigit():
+                                        # 如果年份不是数字，则从 tvshow.nfo 文件中获取年份
+                                        season_year = tvshow_year if tvshow_year else year
+                                    # 使用父目录的标题和当前季的年份
+                                    if tvshow_title:
+                                        douban_ids = douban_api.get_douban_id(tvshow_title, season_year, media_type='tv')
+                                    else:
+                                        logger.warning(f"未找到父目录的 tvshow.nfo 文件中的标题，使用当前文件的标题: {title}")
+                                        douban_ids = douban_api.get_douban_id(title, season_year, media_type='tv')
+                                    if douban_ids:
+                                        logger.info(f"提取到的豆瓣 IDs 是: {douban_ids}")
+                                        for douban_id in douban_ids:
+                                            celebs_data = douban_api.get_celebrities(douban_id, media_type)
+                                            all_directors.extend(celebs_data.get('directors', []))
+                                            all_actors.extend(celebs_data.get('actors', []))
+                                    else:
+                                        logger.warning(f"未能提取豆瓣 ID 对于文件: {season_nfo_path}")
+                                else:
+                                    logger.warning(f"未找到文件 {season_nfo_path} 中的年份")
+                            else:
+                                logger.debug(f"未找到文件: {season_nfo_path}")
                         
                         if all_directors or all_actors:
                             update_nfo_file(file_path, all_directors, all_actors)
                             save_processed_file(file_path)
                     else:
-                        logger.warning(f"未能提取豆瓣 ID 对于文件: {file_path}")
+                        logger.warning(f"不支持的媒体类型: {media_type}")
                 else:
                     logger.warning(f"未能提取标题 对于文件: {file_path}")
 
