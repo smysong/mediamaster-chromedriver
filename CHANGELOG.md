@@ -2,6 +2,18 @@
 
 所有显著的变更都会记录在此文档中。此项目遵循 [语义化版本控制](https://semver.org/spec/v2.0.0.html)。
 
+## [1.8.1] - 2025-03-06
+
+### 优化
+- 优化WEB界面显示效果，提升用户体验。
+- 优化剧集搜索下载程序，排除搜索结果中发行年份不匹配的无效结果。
+
+### 注意事项
+- 本次更新涉及数据库结构变更，请先备份数据库文件（data.db），并删除config目录中的data.db数据库文件，再进行升级，升级完成后将重新生成数据库文件。
+
+### 新增
+- 正在订阅的剧集插入发行年份到数据库中，方便后续搜索下载使用。
+
 ## [1.8.0] - 2025-03-04
 
 ### 优化
@@ -195,3 +207,4 @@
 [1.7.8]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.8
 [1.7.9]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.7.9
 [1.8.0]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.8.0
+[1.8.1]: https://github.com/smysong/mediamaster-chromedriver/releases/tag/1.8.1

@@ -205,19 +205,31 @@ class TVDownloader:
         all_tv_info = []
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT title, missing_episodes FROM MISS_TVS')
+            # 假设数据库中有一个额外的列 'year' 存储年份信息
+            cursor.execute('SELECT title, year, missing_episodes FROM MISS_TVS')
             tvs = cursor.fetchall()
             
-            for title, missing_episodes_str in tvs:
+            for title, year, missing_episodes_str in tvs:
+                # 确保 year 是字符串类型
+                if isinstance(year, int):
+                    year = str(year)  # 将整数转换为字符串
+                
+                # 确保 missing_episodes_str 是字符串类型
+                if isinstance(missing_episodes_str, int):
+                    missing_episodes_str = str(missing_episodes_str)  # 将整数转换为字符串
+                
+                # 处理缺失集数
                 missing_episodes = [int(ep.strip()) for ep in missing_episodes_str.split(',') if ep.strip()]
                 if missing_episodes:
                     min_episode_num = min(missing_episodes)
                     formatted_episode_number = f'{"0" if min_episode_num < 10 else ""}{min_episode_num}'
                 else:
                     formatted_episode_number = '01'  # 如果无缺失集数信息，则认为是从第01集开始缺失
+                
                 resolution = self.config.get("resources", {}).get("preferred_resolution", "")
                 all_tv_info.append({
                     "剧集": title,
+                    "年份": year,
                     "分辨率": resolution,
                     "集数": formatted_episode_number
                 })
@@ -229,6 +241,9 @@ class TVDownloader:
         exclude_keywords = self.config.get("resources", {}).get("exclude_keywords", "")
         exclude_keywords = [keyword.strip() for keyword in exclude_keywords.split(',')]
         
+        # 获取当前条目的年份
+        year = item.get("年份", "")
+        
         for li in list_items:
             try:
                 a_element = li.find_element(By.TAG_NAME, 'a')
@@ -236,6 +251,11 @@ class TVDownloader:
 
                 # 检查是否需要排除此条目
                 if any(keyword in title_text for keyword in exclude_keywords):
+                    continue
+
+                # 检查年份是否匹配
+                if year and year not in title_text:
+                    logger.debug(f"年份不匹配，跳过条目: {title_text}")
                     continue
 
                 # 匹配集数范围
@@ -251,8 +271,12 @@ class TVDownloader:
                 continue
         return found_links
 
+
     def find_full_set_resource(self, resolution, download_records, item):
         list_items = self.driver.find_elements(By.TAG_NAME, 'li')
+        # 获取当前条目的年份
+        year = item.get("年份", "")
+        
         for li in list_items:
             try:
                 a_element = li.find_element(By.TAG_NAME, 'a')
@@ -264,6 +288,11 @@ class TVDownloader:
                 
                 # 检查是否需要排除此条目
                 if any(keyword in title_text for keyword in exclude_keywords):
+                    continue
+                
+                # 检查年份是否匹配
+                if year and year not in title_text:
+                    logger.debug(f"年份不匹配，跳过条目: {title_text}")
                     continue
                 
                 # 匹配全集，并且包含分辨率
@@ -446,6 +475,9 @@ class TVDownloader:
         exclude_keywords = self.config.get("resources", {}).get("exclude_keywords", "")
         exclude_keywords = [keyword.strip() for keyword in exclude_keywords.split(',')]
         
+        # 获取当前条目的年份
+        year = item.get("年份", "")
+        
         for li in list_items:
             try:
                 a_element = li.find_element(By.TAG_NAME, 'a')
@@ -453,6 +485,11 @@ class TVDownloader:
 
                 # 检查是否需要排除此条目
                 if any(keyword in title_text for keyword in exclude_keywords):
+                    continue
+
+                # 检查年份是否匹配
+                if year and year not in title_text:
+                    logger.debug(f"年份不匹配，跳过条目: {title_text}")
                     continue
 
                 # 匹配精确集数
