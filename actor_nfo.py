@@ -217,15 +217,29 @@ def read_nfo_file(file_path):
             logger.warning(f"未知文件类型: {file_path}")
             return None, None, None, None
         
-        # 查找并获取标题和年份
+        # 查找并获取标题
         title = None
-        year = None
         for element in root.findall('.//title'):
             title = element.text
             break  # 只需要第一个匹配到的标题
+        
+        # 查找并获取年份
+        year = None
         for element in root.findall('.//year'):
             year = element.text
             break  # 只需要第一个匹配到的年份
+        
+        # 如果 <year> 标签中没有找到年份，则尝试从 <premiered> 和 <releasedate> 标签中提取年份
+        if not year:
+            for tag in ['premiered', 'releasedate']:
+                for element in root.findall(f'.//{tag}'):
+                    date_str = element.text
+                    if date_str:
+                        try:
+                            year = date_str.split('-')[0]  # 提取年份部分
+                            break
+                        except IndexError:
+                            logger.warning(f"日期格式不正确: {date_str}")
         
         # 查找并获取 IMDb ID
         imdb_id = None
