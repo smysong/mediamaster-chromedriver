@@ -1,6 +1,6 @@
 # MediaMaster
 
-# 现已升级并迁移到[MediaMaster-V2](https://github.com/smysong/MediaMaster-V2)
+# 现已升级并迁移到 [MediaMaster-V2](https://github.com/smysong/MediaMaster-V2)
 
 ## 简介
 
